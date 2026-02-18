@@ -7,4 +7,4 @@ It refines selected text into clear, well-structured, and professional email res
 
 ## 🎥 Live Demo
 
-🔗 [Watch Demo on YouTube](PASTE_YOUR_YOUTUBE_LINK_HERE)
+🔗 [Watch Demo on YouTube]([PASTE_YOUR_YOUTUBE_LINK_HERE](https://www.youtube.com/watch?v=Eg_3R4pzB3o))
