@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>MailCraft — AI Email Reply Generator</title>
 
-    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%23ea580c'/><rect x='10' y='18' width='44' height='30' rx='4' fill='none' stroke='white' stroke-width='3'/><polyline points='10,18 32,36 54,18' fill='none' stroke='white' stroke-width='3' stroke-linejoin='round'/></svg>"/>
 
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
@@ -22,6 +21,7 @@
           --text: #1a1a1a;
           --muted: #9a9a8a;
           --success: #16a34a;
+          --error: #dc2626;
           --radius: 12px;
         }
 
@@ -35,51 +35,34 @@
 
         body::before {
           content: '';
-          position: fixed;
-          inset: 0;
+          position: fixed; inset: 0;
           background:
             radial-gradient(ellipse 80% 60% at 20% 0%, rgba(234,88,12,0.05) 0%, transparent 60%),
             radial-gradient(ellipse 60% 40% at 80% 100%, rgba(234,88,12,0.03) 0%, transparent 60%);
-          pointer-events: none;
-          z-index: 0;
+          pointer-events: none; z-index: 0;
         }
 
         /* ── Page Loader ── */
         #page-loader {
-          position: fixed;
-          inset: 0;
-          background: #fff;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 20px;
-          z-index: 999;
+          position: fixed; inset: 0; background: #fff;
+          display: flex; flex-direction: column; align-items: center;
+          justify-content: center; gap: 20px; z-index: 999;
           transition: opacity 0.5s ease, visibility 0.5s ease;
         }
         #page-loader.hidden { opacity: 0; visibility: hidden; }
         .loader-icon {
-          width: 56px; height: 56px;
-          background: var(--accent);
-          border-radius: 16px;
-          display: flex; align-items: center; justify-content: center;
+          width: 56px; height: 56px; background: var(--accent);
+          border-radius: 16px; display: flex; align-items: center; justify-content: center;
           animation: iconPulse 1.4s ease-in-out infinite;
         }
-        .loader-bar-wrap {
-          width: 150px; height: 3px;
-          background: #ececec;
-          border-radius: 99px; overflow: hidden;
-        }
+        .loader-bar-wrap { width: 150px; height: 3px; background: #ececec; border-radius: 99px; overflow: hidden; }
         .loader-bar-fill {
-          height: 100%; width: 0;
-          background: var(--accent);
-          border-radius: 99px;
+          height: 100%; width: 0; background: var(--accent); border-radius: 99px;
           animation: barFill 1.3s cubic-bezier(0.4,0,0.2,1) forwards;
         }
         .loader-label {
-          font-family: 'DM Mono', monospace;
-          font-size: 0.68rem; letter-spacing: 0.18em;
-          text-transform: uppercase; color: var(--muted);
+          font-family: 'DM Mono', monospace; font-size: 0.68rem;
+          letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
         }
 
         @keyframes iconPulse {
@@ -92,21 +75,15 @@
         /* ── Layout ── */
         .container {
           position: relative; z-index: 1;
-          max-width: 860px; margin: 0 auto;
-          padding: 48px 24px 80px;
+          max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
         }
 
-        header {
-          text-align: center; margin-bottom: 52px;
-          animation: fadeDown 0.7s ease 1.2s both;
-        }
+        header { text-align: center; margin-bottom: 52px; animation: fadeDown 0.7s ease 1.2s both; }
 
         .header-logo {
           display: inline-flex; align-items: center; justify-content: center;
-          width: 54px; height: 54px;
-          background: var(--accent); border-radius: 15px;
-          margin-bottom: 18px;
-          box-shadow: 0 6px 20px rgba(234,88,12,0.28);
+          width: 54px; height: 54px; background: var(--accent); border-radius: 15px;
+          margin-bottom: 18px; box-shadow: 0 6px 20px rgba(234,88,12,0.28);
         }
 
         h1 { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
@@ -140,8 +117,27 @@
           resize: vertical; min-height: 160px;
           transition: border-color 0.2s, box-shadow 0.2s; outline: none;
         }
-        textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(234,88,12,0.1); }
+        textarea:focus  { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(234,88,12,0.1); }
         textarea::placeholder { color: var(--muted); }
+        textarea.error  { border-color: var(--error);  box-shadow: 0 0 0 3px rgba(220,38,38,0.1); }
+
+        /*
+         * ERROR MESSAGE
+         * Default = display:none — NEVER visible on its own.
+         * Only JS can make it visible by adding the .visible class.
+         * No server-side class, no th:classappend — pure JS control.
+         */
+        .error-msg {
+          display: none;
+          align-items: center;
+          gap: 6px;
+          margin-top: 8px;
+          color: var(--error);
+          font-size: 0.82rem;
+          font-family: 'DM Sans', sans-serif;
+          animation: fadeUp 0.25s ease both;
+        }
+        .error-msg.visible { display: flex; }
 
         /* ── Tone pills ── */
         .tone-row { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -151,11 +147,8 @@
           color: var(--muted); font-family: 'DM Sans', sans-serif;
           font-size: 0.85rem; cursor: pointer; transition: all 0.18s ease;
         }
-        .tone-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .tone-btn:hover  { border-color: var(--accent); color: var(--accent); }
         .tone-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 500; }
-
-        /* Hidden radio inputs for Thymeleaf form binding */
-        .tone-radio { display: none; }
 
         /* ── Submit button ── */
         .btn-generate {
@@ -178,7 +171,7 @@
 
         /* ── Output box ── */
         .output-section { margin-top: 28px; }
-        .output-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .output-header  { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 
         .btn-copy {
           display: flex; align-items: center; gap: 6px;
@@ -188,15 +181,14 @@
           font-size: 0.72rem; letter-spacing: 0.08em;
           text-transform: uppercase; cursor: pointer; transition: all 0.18s;
         }
-        .btn-copy:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-copy:hover  { border-color: var(--accent); color: var(--accent); }
         .btn-copy.copied { border-color: var(--success); color: var(--success); }
 
         .output-box {
           background: var(--surface2); border: 1px solid var(--border);
           border-radius: 8px; padding: 20px;
-          font-size: 0.92rem; line-height: 1.7;
-          white-space: pre-wrap; color: var(--text);
-          font-family: 'DM Sans', sans-serif;
+          font-size: 0.92rem; line-height: 1.7; white-space: pre-wrap;
+          color: var(--text); font-family: 'DM Sans', sans-serif;
           animation: fadeUp 0.5s ease both;
         }
 
@@ -234,17 +226,35 @@
     </header>
 
     <div class="card">
-        <!-- Thymeleaf form bound to EmailRequest -->
-        <form th:action="@{/generate}" th:object="${emailRequest}" method="post">
+        <form th:action="@{/generate}" th:object="${emailRequest}" method="post" id="emailForm">
 
             <!-- Email content -->
             <div class="field">
                 <label class="field-label" for="emailContent">Original Email</label>
-                <textarea id="emailContent" th:field="*{emailContent}"
+
+                <textarea id="emailContent"
+                          th:field="*{emailContent}"
                           placeholder="Paste the email you want to reply to..."></textarea>
+
+                <!--
+                    ONE error paragraph — hidden by CSS always.
+                    JS makes it visible ONLY when user clicks Generate with empty box,
+                    OR when server returns an errorMessage after POST.
+                    th:data-server-error safely passes the server message as a data attribute
+                    (empty string when no error) — no hidden spans, no extra elements.
+                -->
+                <p class="error-msg" id="emailError"
+                   th:data-server-error="${errorMessage != null ? errorMessage : ''}">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <span id="emailErrorText">Please paste an email before generating a reply.</span>
+                </p>
             </div>
 
-            <!-- Tone selector (pill UI + hidden field) -->
+            <!-- Tone selector -->
             <div class="field">
                 <span class="field-label">Tone</span>
                 <div class="tone-row" id="toneRow">
@@ -255,7 +265,6 @@
                     <button type="button" class="tone-btn" data-tone="Assertive">Assertive</button>
                     <button type="button" class="tone-btn" data-tone="Empathetic">Empathetic</button>
                 </div>
-                <!-- Hidden input bound to EmailRequest.tone — updated by JS -->
                 <input type="hidden" id="toneInput" th:field="*{tone}" value="Professional"/>
             </div>
 
@@ -286,12 +295,12 @@
 </div><!-- /container -->
 
 <script>
-    // Page loader
+    // ── Page loader ──
     window.addEventListener('load', () => {
       setTimeout(() => document.getElementById('page-loader').classList.add('hidden'), 1400);
     });
 
-    // Tone pill selection → update hidden input
+    // ── Tone pills ──
     const toneButtons = document.querySelectorAll('.tone-btn');
     const toneInput   = document.getElementById('toneInput');
 
@@ -303,36 +312,71 @@
       });
     });
 
-    // Restore active pill from server-side value on page reload
     const savedTone = toneInput.value;
     if (savedTone) {
-      toneButtons.forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.tone === savedTone);
-      });
+      toneButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.tone === savedTone));
     }
 
-    // Typewriter effect on output (runs once after form submit)
+    // ── Error helpers ──
+    const emailForm      = document.getElementById('emailForm');
+    const emailContent   = document.getElementById('emailContent');
+    const emailError     = document.getElementById('emailError');
+    const emailErrorText = document.getElementById('emailErrorText');
+
+    function showError(msg) {
+      emailErrorText.textContent = msg || 'Please paste an email before generating a reply.';
+      emailContent.classList.add('error');
+      emailError.classList.add('visible');
+    }
+
+    function clearError() {
+      emailContent.classList.remove('error');
+      emailError.classList.remove('visible');
+    }
+
+    // ── On page load: show error ONLY if server explicitly sent one ──
+    // Uses data attribute set by Thymeleaf — empty string = no error.
+    window.addEventListener('DOMContentLoaded', () => {
+      const serverMsg = (emailError.dataset.serverError || '').trim();
+      if (serverMsg.length > 0) {
+        // Server returned an error after POST (e.g. empty submit bypassing JS)
+        showError(serverMsg);
+      }
+      // If serverMsg is empty string (fresh GET load or successful POST), do nothing.
+    });
+
+    // ── Client-side: block submit if textarea is empty ──
+    emailForm.addEventListener('submit', (e) => {
+      if (!emailContent.value.trim()) {
+        e.preventDefault();
+        showError('Please paste an email before generating a reply.');
+        emailContent.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        emailContent.focus();
+      }
+    });
+
+    // ── Clear error as soon as user starts typing ──
+    emailContent.addEventListener('input', () => {
+      if (emailContent.value.trim()) clearError();
+    });
+
+    // ── Typewriter effect on output ──
     window.addEventListener('DOMContentLoaded', () => {
       const box = document.getElementById('outputBox');
       if (!box) return;
       const fullText = box.textContent;
       box.textContent = '';
       box.style.borderRight = '2px solid var(--accent)';
-
       let i = 0;
       const speed = Math.max(8, Math.min(18, Math.floor(8000 / fullText.length)));
       const type = () => {
-        if (i < fullText.length) {
-          box.textContent += fullText[i++];
-          setTimeout(type, speed);
-        } else {
-          box.style.borderRight = 'none';
-        }
+        if (i < fullText.length) { box.textContent += fullText[i++]; setTimeout(type, speed); }
+        else { box.style.borderRight = 'none'; }
       };
       type();
     });
 
-    // Copy to clipboard
+    // ── Copy to clipboard ──
     function copyReply() {
       const box = document.getElementById('outputBox');
       const btn = document.getElementById('copyBtn');

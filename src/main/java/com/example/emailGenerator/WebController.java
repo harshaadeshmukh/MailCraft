@@ -23,6 +23,16 @@ public class WebController {
     public String generate(
             @ModelAttribute EmailRequest emailRequest,
             Model model) throws Exception {
+
+        // ── Server-side guard ──────────────────────────────────────
+        if (emailRequest.getEmailContent() == null ||
+                emailRequest.getEmailContent().isBlank()) {
+            model.addAttribute("errorMessage", "Please paste an email before generating a reply.");
+            model.addAttribute("emailRequest", emailRequest);
+            return "index";
+        }
+        // ──────────────────────────────────────────────────────────
+
         String reply = emailGeneratorService.generateEmailReply(emailRequest);
         model.addAttribute("generatedReply", reply);
         model.addAttribute("emailRequest", emailRequest);
