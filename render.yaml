@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: mailcraft-backend
+    env: java
+    buildCommand: ./mvnw clean package -DskipTests
+    startCommand: java -jar target/*.jar
+    envVars:
+      - key: gemini.api.key
+        sync: false
+      - key: gemini.api.url
+        value: https://generativelanguage.googleapis.com
