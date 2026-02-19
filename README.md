@@ -183,11 +183,12 @@ This project is open source. Feel free to use, modify, and distribute it.
 
 ---
 
-## 👨‍💻 Author
+<div align="center">
 
-**Harsha Deshmukh**
-- GitHub: [@harshaadeshmukh](https://github.com/harshaadeshmukh)
+Made with ❤️ by Harshad Deshmukh
 
----
+⭐ Star this repo if you found it helpful!
 
-> ⭐ If you found this project useful, please consider giving it a star!
+🚀 Happy Coding! 🎉
+
+</div>
