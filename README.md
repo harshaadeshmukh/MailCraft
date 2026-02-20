@@ -1,6 +1,6 @@
 # MailCraft — AI-Powered Chrome Extension ✉️🤖
 
-> Refine selected text into clear, well-structured, and professional email responses inside Gmail — with a single click.
+> Refine selected text into clear, well-structured, and professional email responses — with a single click.
 
 ---
 
@@ -12,18 +12,20 @@
 
 ## 📌 Overview
 
-**MailCraft** is an AI-powered Chrome extension that helps users generate professional emails instantly inside Gmail. It refines selected text into clear, well-structured, and professional email responses with a single click, saving time and improving productivity.
+**MailCraft** is an AI-powered Chrome extension that helps users generate professional emails instantly. It refines selected text into clear, well-structured, and professional email responses with a single click, saving time and improving productivity.
 
-Whether you're dealing with a flood of work emails or just struggling to find the right words, MailCraft gives you a head start every time — without ever leaving Gmail.
+Whether you're dealing with a flood of work emails or just struggling to find the right words, MailCraft gives you a head start every time.
 
 ---
 
 ## ✨ Features
 
-- 🧩 **Chrome Extension** — Works directly inside Gmail, no tab switching needed
+- 🧩 **Chrome Extension** — Works directly inside your browser, no tab switching needed
 - 🧠 **AI-Powered Replies** — Uses Google Gemini API to generate intelligent, context-aware email responses
 - 🎭 **Tone Selection** — Choose from tones like Professional, Friendly, Formal, Casual, and more
 - ⚡ **One-Click Generation** — Select your draft text and get a polished reply instantly
+- 🔑 **API Key Rotation** — Rotates across 5 Gemini API keys for high availability and rate limit handling
+- 🔴 **Redis Caching** — Caches replies via Upstash Redis to reduce API calls and improve response time
 - 🐳 **Docker Ready** — Fully containerized backend for easy local setup and deployment
 - ☁️ **Deployed on Render** — Backend hosted on Render for reliable availability
 
@@ -35,8 +37,29 @@ Whether you're dealing with a flood of work emails or just struggling to find th
 |---|---|---|
 | 🖥️ **Backend** | Java 21 + Spring Boot | Spring Boot is the gold standard for building production-grade REST APIs in Java. It offers auto-configuration, embedded server, and a massive ecosystem — perfect for quickly scaffolding a robust backend. |
 | 🤖 **AI Engine** | Google Gemini API | Gemini provides state-of-the-art language understanding and generation capabilities. It's free-tier friendly, fast, and produces high-quality text — ideal for generating natural-sounding email replies. |
-| 🐳 **Containerization** | Docker | Docker ensures the app runs identically across all environments (local, staging, production). The Dockerfile packages the Spring Boot JAR into a portable image, eliminating "works on my machine" problems. |
-| ☁️ **Deployment** | Render | Render supports Docker-based deployments out of the box and offers a free tier for hobby projects. The `render.yaml` file enables Infrastructure-as-Code style deployments for easy CI/CD. |
+| 🔴 **Caching** | Upstash Redis | Upstash is a managed, serverless Redis service. It caches email replies so repeated requests are served instantly without hitting the Gemini API again — saving rate limit quota and improving speed. |
+| 🐳 **Containerization** | Docker | Docker ensures the app runs identically across all environments. The Dockerfile uses a multi-stage build to keep the final image small and production-ready. |
+| ☁️ **Deployment** | Render | Render supports Docker-based deployments out of the box and offers a free tier for hobby projects. The `render.yaml` enables Infrastructure-as-Code style deployments for easy CI/CD. |
+
+---
+
+## ⚙️ How It Works
+
+```
+User Request (Chrome Extension)
+        ↓
+Redis Cache? ──HIT──→ Instant reply ✅ (0 API calls used)
+        ↓ MISS
+ApiKeyRotator picks next key (round-robin)
+        ↓
+Try Key 1 → fails? → Try Key 2 → fails? → Try Key 3 ✅
+        ↓
+Gemini API generates reply
+        ↓
+Store in Redis Cache (TTL: 1 hour)
+        ↓
+Return reply to user ✅
+```
 
 ---
 
@@ -46,12 +69,21 @@ Whether you're dealing with a flood of work emails or just struggling to find th
 MailCraft/
 ├── src/
 │   └── main/
-│       ├── java/          # Spring Boot application code
-│       │   └── ...        # Controllers, Services, Models
+│       ├── java/
+│       │   └── com/example/emailGenerator/
+│       │       ├── EmailGeneratorApplication.java   # App entry point
+│       │       ├── EmailGeneratorController.java    # REST API controller
+│       │       ├── EmailGeneratorService.java       # Core business logic + caching
+│       │       ├── ApiKeyRotator.java               # Round-robin key rotation
+│       │       ├── RedisConfig.java                 # Redis serialization config
+│       │       ├── EmailRequest.java                # Request model
+│       │       └── WebController.java               # Web routes
 │       └── resources/
-│           └── static/    # HTML, CSS, JS frontend files
+│           ├── static/                              # Frontend files
+│           ├── templates/                           # Thymeleaf templates
+│           └── application.properties              # App configuration
 ├── .mvn/wrapper/          # Maven wrapper files
-├── Dockerfile             # Docker image definition
+├── Dockerfile             # Multi-stage Docker build
 ├── render.yaml            # Render deployment configuration
 ├── pom.xml                # Maven dependencies & build config
 ├── mvnw / mvnw.cmd        # Maven wrapper scripts (Linux/Windows)
@@ -66,8 +98,8 @@ MailCraft/
 
 - Java 17+ (or 21)
 - Maven (or use the included `mvnw` wrapper)
-- Google Gemini API Key ([Get one here](https://aistudio.google.com/app/apikey))
-- Docker (optional, for containerized setup)
+- 5x Google Gemini API Keys ([Get one here](https://aistudio.google.com/app/apikey))
+- Upstash Redis account ([Sign up here](https://upstash.com))
 
 ---
 
@@ -79,15 +111,15 @@ git clone https://github.com/harshaadeshmukh/MailCraft.git
 cd MailCraft
 ```
 
-**2. Set your Gemini API Key**
+**2. Set Environment Variables in IntelliJ**
 
-Add your API key to `src/main/resources/application.properties`:
-```properties
-gemini.api.key=YOUR_GEMINI_API_KEY_HERE
+Go to **Run → Edit Configurations → Environment Variables** and add:
 ```
-Or set it as an environment variable:
-```bash
-export GEMINI_API_KEY=your_key_here
+GEMINI_API_URL   = https://generativelanguage.googleapis.com
+GEMINI_API_KEYS  = key1,key2,key3,key4,key5
+REDIS_HOST       = your-upstash-host
+REDIS_PORT       = 6379
+REDIS_PASSWORD   = your-upstash-password
 ```
 
 **3. Build and run**
@@ -102,23 +134,7 @@ Navigate to `http://localhost:8080` in your browser.
 
 ---
 
-### 🐳 Local Setup (With Docker)
 
-**1. Build the Docker image**
-```bash
-docker build -t mailcraft .
-```
-
-**2. Run the container**
-```bash
-docker run -p 8080:8080 -e GEMINI_API_KEY=your_key_here mailcraft
-```
-
-**3. Open the app**
-
-Navigate to `http://localhost:8080` in your browser.
-
----
 
 ## 🌐 API Reference
 
@@ -141,16 +157,50 @@ Navigate to `http://localhost:8080` in your browser.
 }
 ```
 
+**Error Response (all keys exhausted):**
+```
+Status: 503
+Body: "⏳ All keys are busy. Please try again in a minute."
+```
+
 ---
 
 ## ☁️ Deployment on Render
 
-This project includes a `render.yaml` for one-click deployment on [Render](https://render.com).
+**1.** Push your code to GitHub
 
-1. Push your code to GitHub
-2. Connect your GitHub repo to Render
-3. Add `GEMINI_API_KEY` as an environment variable in Render's dashboard
-4. Render will auto-build the Docker image and deploy it
+**2.** Go to [render.com](https://render.com) → **New Web Service** → connect your repo
+
+**3.** Set these environment variables in Render dashboard:
+```
+GEMINI_API_URL   = https://generativelanguage.googleapis.com
+GEMINI_API_KEYS  = key1,key2,key3,key4,key5
+REDIS_HOST       = your-upstash-host
+REDIS_PORT       = 6379
+REDIS_PASSWORD   = your-upstash-password
+```
+
+**4.** Render auto-builds the Docker image and deploys ✅
+
+---
+
+## 🔑 API Key Rotation — How It Works
+
+MailCraft treats API keys like server instances behind a load balancer — **horizontal scaling applied to API keys.**
+
+```
+                  ┌─── Key 1 (15 req/min) ───┐
+                  │                           │
+Request ──→ ApiKeyRotator ─── Key 2 (15 req/min) ───→ Gemini API
+                  │                           │
+                  └─── Key 3 (15 req/min) ───┘
+
+Total capacity = 15 req/min × number of keys
+```
+
+- Uses `AtomicInteger` for thread-safe round-robin selection
+- If one key fails → automatically tries the next key
+- 5 keys = **75 requests/min, 7500 requests/day** — completely free ✅
 
 ---
 
@@ -159,9 +209,12 @@ This project includes a `render.yaml` for one-click deployment on [Render](https
 - [ ] Support for Outlook and other email clients
 - [ ] Multiple AI model support (OpenAI, Claude, etc.)
 - [ ] User authentication and reply history
+- [ ] Redis request queue for when all keys are exhausted
+- [ ] Key health monitoring with auto-recovery
 - [ ] Additional tone options (Empathetic, Assertive, Apologetic)
 - [ ] Smart subject line suggestions
 - [ ] Publish to Chrome Web Store
+- [ ] Kubernetes deployment for 10,000+ users
 
 ---
 
