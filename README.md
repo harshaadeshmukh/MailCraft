@@ -24,7 +24,7 @@ Whether you're dealing with a flood of work emails or just struggling to find th
 - 🧠 **AI-Powered Replies** — Uses Google Gemini API to generate intelligent, context-aware email responses
 - 🎭 **Tone Selection** — Choose from tones like Professional, Friendly, Formal, Casual, and more
 - ⚡ **One-Click Generation** — Select your draft text and get a polished reply instantly
-- 🔑 **API Key Rotation** — Rotates across 5 Gemini API keys for high availability and rate limit handling
+- 🔑 **API Key Rotation** — Rotates across multiple Gemini API keys for high availability and rate limit handling
 - 🔴 **Redis Caching** — Caches replies via Upstash Redis to reduce API calls and improve response time
 - 🐳 **Docker Ready** — Fully containerized backend for easy local setup and deployment
 - ☁️ **Deployed on Render** — Backend hosted on Render for reliable availability
@@ -98,7 +98,7 @@ MailCraft/
 
 - Java 17+ (or 21)
 - Maven (or use the included `mvnw` wrapper)
-- 5x Google Gemini API Keys ([Get one here](https://aistudio.google.com/app/apikey))
+- Google Gemini API Keys ([Get one here](https://aistudio.google.com/app/apikey))
 - Upstash Redis account ([Sign up here](https://upstash.com))
 
 ---
@@ -116,7 +116,7 @@ cd MailCraft
 Go to **Run → Edit Configurations → Environment Variables** and add:
 ```
 GEMINI_API_URL   = https://generativelanguage.googleapis.com
-GEMINI_API_KEYS  = key1,key2,key3,key4,key5 and so on
+GEMINI_API_KEYS  = your-gemini-api-keys
 REDIS_HOST       = your-upstash-host
 REDIS_PORT       = 6379
 REDIS_PASSWORD   = your-upstash-password
@@ -174,7 +174,7 @@ Body: "⏳ All keys are busy. Please try again in a minute."
 **3.** Set these environment variables in Render dashboard:
 ```
 GEMINI_API_URL   = https://generativelanguage.googleapis.com
-GEMINI_API_KEYS  = key1,key2,key3,key4,key5
+GEMINI_API_KEYS  = your-gemini-api-keys
 REDIS_HOST       = your-upstash-host
 REDIS_PORT       = 6379
 REDIS_PASSWORD   = your-upstash-password
@@ -200,7 +200,7 @@ Total capacity = 15 req/min × number of keys
 
 - Uses `AtomicInteger` for thread-safe round-robin selection
 - If one key fails → automatically tries the next key
-- 5 keys = **75 requests/min, 7500 requests/day** — completely free ✅
+- More keys = more capacity — completely free ✅
 
 ---
 
