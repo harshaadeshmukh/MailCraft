@@ -21,9 +21,17 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         this.redisTemplate = redisTemplate;
     }
 
+    private String getClientIp(HttpServletRequest request) {
+        String xfHeader = request.getHeader("X-Forwarded-For");
+        if (xfHeader == null || xfHeader.isEmpty() || "unknown".equalsIgnoreCase(xfHeader)) {
+            return request.getRemoteAddr();
+        }
+        return xfHeader.split(",")[0].trim();
+    }
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String clientIp = request.getRemoteAddr();
+        String clientIp = getClientIp(request);
         String redisKey = "rate_limit:" + clientIp;
         // Increment the count for this IP
         Long currentCount = redisTemplate.opsForValue().increment(redisKey);
