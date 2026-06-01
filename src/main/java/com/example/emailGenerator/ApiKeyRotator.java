@@ -30,7 +30,9 @@ public class ApiKeyRotator {
     }
 
     public String getNextKey() {
-        int index = Math.abs(counter.getAndIncrement() % apiKeys.size());
+        // We use bitwise AND with Integer.MAX_VALUE to prevent Math.abs(Integer.MIN_VALUE) 
+        // from returning a negative number and causing an out-of-bounds error after 2 billion calls.
+        int index = (counter.getAndIncrement() & Integer.MAX_VALUE) % apiKeys.size();
         log.info("🔑 Using key index {}", index);
         return apiKeys.get(index);
     }
