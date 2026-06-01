@@ -5,7 +5,7 @@ services:
     buildCommand: ./mvnw clean package -DskipTests
     startCommand: java -jar target/*.jar
     envVars:
-      - key: gemini.api.key
+      - key: GEMINI_API_KEYS
         sync: false
-      - key: gemini.api.url
+      - key: GEMINI_API_URL
         value: https://generativelanguage.googleapis.com
