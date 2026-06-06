@@ -47,6 +47,21 @@ Whether you're dealing with a flood of work emails or just struggling to find th
 
 MailCraft's architecture is designed to handle high loads efficiently by utilizing caching and API key rotation:
 
+```mermaid
+graph TD
+    A[Chrome Extension] -->|HTTP POST Request| B(Spring Boot Backend)
+    B -->|Check Rate Limit| C{IP Rate Limiter}
+    C -->|Limit Exceeded| D[429 Too Many Requests]
+    C -->|Allowed| E{Check Cache}
+    E -->|Cache Hit| F[(Upstash Redis)]
+    F -->|Return Cached Reply| B
+    E -->|Cache Miss| G[ApiKeyRotator]
+    G -->|Selects Key| H[Google Gemini API]
+    H -->|Generate Reply| B
+    B -->|Store Reply| F
+    B -->|Send Reply| A
+```
+
 1. **Client Layer (Chrome Extension):** The user selects text and requests an email reply with a specific tone.
 2. **API Layer (Spring Boot Backend):** The backend receives the request and acts as a central orchestrator. It applies an IP-based rate limiter.
 3. **Caching Layer (Upstash Redis):** Before querying the AI model, the backend checks Redis to see if the exact same email content and tone have already been processed. If yes, it returns the cached response, avoiding an AI request.
