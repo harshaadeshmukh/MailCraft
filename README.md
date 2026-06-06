@@ -43,6 +43,18 @@ Whether you're dealing with a flood of work emails or just struggling to find th
 
 ---
 
+## 🏗️ Architecture
+
+MailCraft's architecture is designed to handle high loads efficiently by utilizing caching and API key rotation:
+
+1. **Client Layer (Chrome Extension):** The user selects text and requests an email reply with a specific tone.
+2. **API Layer (Spring Boot Backend):** The backend receives the request and acts as a central orchestrator. It applies an IP-based rate limiter.
+3. **Caching Layer (Upstash Redis):** Before querying the AI model, the backend checks Redis to see if the exact same email content and tone have already been processed. If yes, it returns the cached response, avoiding an AI request.
+4. **AI Engine Layer (Gemini API with Key Rotation):** If there is no cache, the `ApiKeyRotator` selects an available Google Gemini API key using a round-robin strategy. If one key is exhausted or hits rate limits, it falls back to the next key.
+5. **Response:** The generated email is sent back to the client and simultaneously cached in Redis for future requests.
+
+---
+
 ## ⚙️ How It Works
 
 ```
@@ -201,6 +213,10 @@ Total capacity = 15 req/min × number of keys
 - Uses `AtomicInteger` for thread-safe round-robin selection
 - If one key fails → automatically tries the next key
 - More keys = more capacity — completely free ✅
+
+### ⚠️ API Key Limitations
+- Please note the API key limitations: **only within 60 seconds we can create request up to 10**. 
+- The built-in rate limiter ensures that no single user IP exceeds this limit within the 60-second window, protecting the app from spam and ensuring fairness across all users.
 
 ---
 
