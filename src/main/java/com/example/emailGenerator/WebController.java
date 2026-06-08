@@ -18,6 +18,12 @@ public class WebController {
         model.addAttribute("emailRequest", new EmailRequest());
         return "index";
     }
+    @GetMapping("/generate")
+    public String generateGet() {
+        // If a user refreshes the page or types /generate in the URL bar, 
+        // redirect them back to the home page instead of showing a 405 error.
+        return "redirect:/";
+    }
 
     @PostMapping("/generate")
     public String generate(

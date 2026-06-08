@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*", exposedHeaders = {"X-RateLimit-Limit", "X-RateLimit-Remaining"})
 @RestController
 @RequestMapping("/api/email")
 @AllArgsConstructor
