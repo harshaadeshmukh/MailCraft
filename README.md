@@ -7,6 +7,7 @@
 ## 🎥 Live Demo
 
 🔗 [Watch Demo on YouTube](https://www.youtube.com/watch?v=Eg_3R4pzB3o)
+🔗 **Live API URL:** `https://mailcraft-engine.onrender.com`
 
 ---
 

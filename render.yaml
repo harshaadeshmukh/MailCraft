@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: mailcraft-backend
+    name: mailcraft-engine
     env: java
     buildCommand: ./mvnw clean package -DskipTests
     startCommand: java -jar target/*.jar
